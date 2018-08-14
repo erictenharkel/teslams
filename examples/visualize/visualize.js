@@ -319,7 +319,8 @@ app.namespace(baseUrl, function() {
     MongoClient.connect(mongoUri, function(err, db) {
         // this is the first time we connect - if we get an error, just throw it
         if(err) throw(err);
-        var collectionA = db.collection("tesla_aux");
+        dbo-db.db(argv.db);
+        var collectionA = dbo.collection("tesla_aux");
         // get the last stored entry that describes the vehicles
         var query = {'vehicles': { '$exists': true } };
         var options = { 'sort': [['ts', 'desc']], 'limit': 1};
@@ -487,7 +488,8 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
-            var collection = db.collection("tesla_stream");
+            dbo=db.db(argv.db);
+            var collection = dbo.collection("tesla_stream");
             if (req.query.at === null) {
                 if (argv.verbose) console.log("why is there no 'at' parameter???");
                 return;
@@ -517,7 +519,8 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
-            var collection = db.collection("trip_data");
+            dbo=db.db(argv.db);
+            var collection = dbo.collection("trip_data");
             collection.remove({ 'dist': '-1'}, function(err,docs) {
                 collection.insert(req.query, { 'safe': true }, function(err,docs) {
                     if (err) {
@@ -536,7 +539,8 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
-            var collection = db.collection("trip_data");
+            dbo=db.db(argv.db);
+            var collection = dbo.collection("trip_data");
             var options = { 'sort': [['chargeState.battery_range', 'desc']] };
             collection.find({},{ 'sort': [['from', 'desc']], 'limit': 1 }).toArray(function(err,docs) {
                 console.log(docs);
@@ -555,7 +559,8 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
-            var collection = db.collection("tesla_stream");
+            dbo-db.db(argv.db);
+            var collection = dbo.collection("tesla_stream");
             if (req.query.until === null) {
                 console.log("why is there no 'until' parameter???");
                 return;
@@ -617,7 +622,8 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
-            var collection = db.collection("tesla_stream");
+            dbo=db.db(argv.db);
+            var collection = dbo.collection("tesla_stream");
             var searchString = {$gte: +from, $lte: +to};
             collection.find({"ts": searchString}).limit(1).toArray(function(err,docs) {
                 if (argv.verbose) console.log("got datasets:", docs.length);
@@ -673,7 +679,8 @@ app.namespace(baseUrl, function() {
                 return;
             }
             res.setHeader("Content-Type", "text/html");
-            var collection = db.collection("tesla_stream");
+            dbo=db.db(argv.db);
+            var collection = dbo.collection("tesla_stream");
             collection.find({"ts": {$gte: +from, $lte: +to}}).toArray(function(err,docs) {
                 docs.forEach(function(doc) {
                     vals = doc.record.toString().replace(",,",",0,").split(",");
@@ -726,8 +733,8 @@ app.namespace(baseUrl, function() {
                 var chartEnd = lastDate;
 
                 // now look for data in the aux collection
-
-                var collection = db.collection("tesla_aux");
+                dbo=db.db(argv.db);
+                var collection = dbo.collection("tesla_aux");
                 var maxAmp = 0, maxVolt = 0, maxMph = 0, maxPower = 0;
                 var outputAmp = "", outputVolt = "", outputPower = "";
                 var amp, volt, power;
@@ -869,8 +876,9 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
+            dbo=db.db(argv.db);
             var output = "";
-            var collection = db.collection("tesla_aux");
+            var collection = dbo.collection("tesla_aux");
             var options = { 'sort': [['chargeState.battery_range', 'desc']] };
             collection.find({"chargeState": {$exists: true}}).toArray(function(err,docs) {
                 var comma = "";
@@ -914,8 +922,9 @@ app.namespace(baseUrl, function() {
                 console.log('error connecting to database:', err);
                 return;
             }
+            dbo=db.db(argv.db);
             res.setHeader("Content-Type", "text/html");
-            var collection = db.collection("tesla_stream");
+            var collection = dbo.collection("tesla_stream");
             if (argv.verbose)
                 console.log("starting DB request after", new Date().getTime() - debugStartTime, "ms");
             collection.find({"ts": {"$gte": from.getTime(), "$lte": to.getTime()}}).toArray(function(err,docs) {
@@ -1019,7 +1028,7 @@ app.namespace(baseUrl, function() {
                 updateValues();
                 updateWValues(true);
                 // now analyze the charging data
-                collection = db.collection("tesla_aux");
+                collection = dbo.collection("tesla_aux");
                 collection.find({"chargeState": {$exists: true}, "ts": {$gte: +from, $lte: +to}}).toArray(function(err,docs) {
                     var i = 0, vampirekWh = 0, day, lastDay = -1, lastDate = null, comma = "", outputY = "", outputWY = "", commaW = "";
                     var j = 0, chargekWh = 0, outputCN = "", usedkWh = 0, outputUsed = "", outputWCN = "", outputWUsed = "";
@@ -1203,7 +1212,8 @@ app.namespace(baseUrl, function() {
                     console.log('error connecting to database:', err);
                     return;
                 }
-                var collection = db.collection("trip_data");
+                dbo=db.db(argv.db);
+                var collection = dbo.collection("trip_data");
                 // strangely the timestamps end up in the database as strings
                 var searchString = {$and: [ {'from': {$gte: ""+from.getTime()}}, {'to': {$lte: ""+to.getTime()}} ] };
                 collection.find(searchString).toArray(function(err,docs) {
